@@ -1,7 +1,6 @@
 package mvc
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -86,10 +85,8 @@ func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request){
 	var started bool
 	requestPath := r.URL.Path
 	for prefix, staticDir := range StaticDir{
-		//完全一致に変えたほうがいい　/imghogehogeで通ってしまう
 		if strings.HasPrefix(requestPath, prefix){
 			file := staticDir + requestPath[len(prefix):]
-			fmt.Println(file)
 			http.ServeFile(w, r, file)
 			started = true
 			return

@@ -5,8 +5,8 @@ type App struct {
 
 var StaticDir = make(map[string]string)
 
-func (p *App) SetStaticPath(url string, path string) {
-	StaticDir[url] = path
+func (p *App) SetStaticPath(prefix string, path string) {
+	StaticDir[prefix] = path
 }
 
 func NewApp() *App{
