@@ -1,9 +1,12 @@
 package controllers
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/yuyutyanu/mvc"
+)
 
 type RootController struct {
-	Controller
+	mvc.Controller
 }
 
 func (this *RootController) Get(){

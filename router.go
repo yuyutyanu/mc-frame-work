@@ -1,6 +1,7 @@
-package controllers
+package mvc
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -15,10 +16,8 @@ type controllerInfo struct {
 }
 type ControllerRegsiter struct{
 	routes []*controllerInfo
-	Application *App
 }
 
-type App struct {}
 type Context struct {
 	ResponseWriter http.ResponseWriter
 	Request *http.Request
@@ -83,7 +82,6 @@ func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request){
 	//}()
 	// -----------------------------:Todo
 
-	var StaticDir map[string]string
 	// static routing
 	var started bool
 	requestPath := r.URL.Path
@@ -91,6 +89,7 @@ func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request){
 		//完全一致に変えたほうがいい　/imghogehogeで通ってしまう
 		if strings.HasPrefix(requestPath, prefix){
 			file := staticDir + requestPath[len(prefix):]
+			fmt.Println(file)
 			http.ServeFile(w, r, file)
 			started = true
 			return

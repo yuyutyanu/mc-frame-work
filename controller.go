@@ -1,4 +1,4 @@
-package controllers
+package mvc
 
 import (
 	"html/template"
