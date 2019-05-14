@@ -1,6 +1,8 @@
 package mvc
 
 import (
+	"github.com/yuyutyanu/mvc/conf"
+	"github.com/yuyutyanu/mvc/utils"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -46,10 +48,11 @@ func (p *ControllerRegsiter) Add(pettern string, c ControllerInterface){
 	newPattern := strings.Join(parts, "/")
 	regex, regexErr := regexp.Compile(newPattern)
 
-	if regexErr != nil {
-		panic(regexErr)
-		return
-	}
+	//if regexErr != nil {
+	//	panic(regexErr)
+	//	return
+	//}
+	utils.DoError(regexErr)
 
 	t := reflect.Indirect(reflect.ValueOf(c)).Type()
 	route := &controllerInfo{}
@@ -150,7 +153,12 @@ func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request){
 			method.Call(in)
 		}
 
-		if AutoRender := false; AutoRender {
+		cfg, err := conf.LoadConfig(".env")
+		utils.DoError(err)// Todo error を拾う層をつくる
+		AutoRender, err := cfg.Bool("AutoRender")
+		utils.DoError(err)
+
+		if AutoRender{
 			method = vc.MethodByName("Render")
 			method.Call(in)
 		}

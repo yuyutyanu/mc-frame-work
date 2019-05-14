@@ -1,8 +1,10 @@
 package mvc
 
 import (
+	"github.com/yuyutyanu/mvc/utils"
 	"html/template"
 	"net/http"
+	"path"
 )
 
 type Controller struct {
@@ -11,7 +13,7 @@ type Controller struct {
 	Data map[interface{}]interface{}
 	ChildName string
 	TplNames string
-	Layout []string
+	Template []string
 	TplExt string
 }
 
@@ -31,7 +33,7 @@ type ControllerInterface interface {
 
 func (c *Controller) Init(ct *Context, controllerName string){
 	c.Data = make(map[interface{}]interface{})
-	c.Layout = make([]string,0)
+	c.Template = make([]string,0)
 	c.TplNames = ""
 	c.ChildName = controllerName
 	c.Ct = ct
@@ -61,32 +63,24 @@ func (c *Controller) Options(){
 }
 
 func (c *Controller) Render() error{
-	//if len(c.Layout) > 0 {
-	//	var filenames []string
-	//	for _, file := range c.Layout {
-	//		filenames = append(filenames, path.Join(ViewsPath, file))
-	//	}
-	//	t, err := template.ParseFiles(filenames...)
-	//	if err != nil {
-	//		Trace("template ParseFiles err:", err)
-	//	}
-	//	err = t.ExecuteTemplate(c.Ct.ResponseWriter, c.TplNames, c.Data)
-	//	if err != nil {
-	//		Trace("template Execute err:", err)
-	//	}
-	//} else {
-	//	if c.TplNames == "" {
-	//		c.TplNames = c.ChildName + "/" + c.Ct.Request.Method + "." + c.TplExt
-	//	}
-	//	t, err := template.ParseFiles(path.Join(ViewsPath, c.TplNames))
-	//	if err != nil {
-	//		Trace("template ParseFiles err:", err)
-	//	}
-	//	err = t.Execute(c.Ct.ResponseWriter, c.Data)
-	//	if err != nil {
-	//		Trace("template Execute err:", err)
-	//	}
-	//}
+	if len(c.Template) > 0 {
+		var filenames []string
+		for _, file := range c.Template {
+			filenames = append(filenames, path.Join("./views/template/", file))
+		}
+		t, err := template.ParseFiles(filenames...)
+		utils.DoError(err)
+		err = t.ExecuteTemplate(c.Ct.ResponseWriter, c.TplNames, c.Data)
+		utils.DoError(err)
+	} else {
+		if c.TplNames == "" {
+			c.TplNames = c.ChildName + "/" + c.Ct.Request.Method + "." + c.TplExt
+		}
+		t, err := template.ParseFiles(path.Join("./views/", c.TplNames))
+		utils.DoError(err)
+		err = t.Execute(c.Ct.ResponseWriter, c.Data)
+		utils.DoError(err)
+	}
 	return nil
 }
 //func (c *Controller) Redirect(url string, code int) {
