@@ -43,22 +43,22 @@ func (c *Controller) Prepare(ct *Context){}
 func (c *Controller) Finish(ct *Context){}
 
 func (c *Controller) Post(ct *Context){
-	http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+	http.Error(ct.ResponseWriter, "Method Not Allowed", 405)
 }
 func (c *Controller) Delete(ct *Context){
-	http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+	http.Error(ct.ResponseWriter, "Method Not Allowed", 405)
 }
 func (c *Controller) Put(ct *Context){
-	http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+	http.Error(ct.ResponseWriter, "Method Not Allowed", 405)
 }
 func (c *Controller) Head(ct *Context){
-	http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+	http.Error(ct.ResponseWriter, "Method Not Allowed", 405)
 }
 func (c *Controller) Patch(ct *Context){
-	http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+	http.Error(ct.ResponseWriter, "Method Not Allowed", 405)
 }
 func (c *Controller) Options(ct *Context){
-	http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
+	http.Error(ct.ResponseWriter, "Method Not Allowed", 405)
 }
 
 //todo 扱いづらいので base template を指定したら依存関係を解決するように
