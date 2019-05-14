@@ -153,7 +153,7 @@ func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request){
 			method.Call(in)
 		}
 
-		cfg, err := conf.LoadConfig(".env")
+		cfg, err := conf.LoadConfig(".env.sample")
 		utils.DoError(err)// Todo error を拾う層をつくる
 		AutoRender, err := cfg.Bool("AutoRender")
 		utils.DoError(err)
