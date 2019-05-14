@@ -47,7 +47,7 @@ func (p *ControllerRegsiter) Add(pettern string, c ControllerInterface) {
 	}
 	newPattern := strings.Join(parts, "/")
 	regex, regexErr := regexp.Compile(newPattern)
-	utils.DoError(regexErr)
+	utils.DoError(regexErr) //TODO add error handling here to avoid panic
 
 	route := &controllerInfo{}
 	route.regex = regex
@@ -59,24 +59,25 @@ func (p *ControllerRegsiter) Add(pettern string, c ControllerInterface) {
 
 func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	//Todo :------------------------
-	//defer func(){
-	//	if err := recover(); err != nil{
-	//		if !RecoverPanic {
-	//			panic(err)
-	//		}else {
-	//			Critical("Handler crashed with error", err)
-	//			for i := 1; ;i +=1  {
-	//				_, file, line,ok := runtime.Caller(i)
-	//				if !ok {
-	//					break;
-	//				}
-	//				Critical(file, line)
-	//			}
-	//		}
-	//	}
-	//}()
-	// -----------------------------:Todo
+	defer func() {
+		if err := recover(); err != nil {
+			if err != nil {
+				panic(err) //TODO add error handling here to avoid panic
+			}
+			//if !RecoverPanic {
+			//	panic(err)
+			//}else {
+			//	log.Critical("Handler crashed with error", err)
+			//	for i := 1; ;i +=1  {
+			//		_, file, line,ok := runtime.Caller(i)
+			//		if !ok {
+			//			break;
+			//		}
+			//		log.Critical(file, line)
+			//	}
+			//}
+		}
+	}()
 
 	// static routing
 	var started bool
@@ -133,10 +134,8 @@ func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			route.controller.Options(ct)
 		}
 
-		cfg, err := conf.LoadConfig(".env")
-		utils.DoError(err) // Todo error を拾う層をつくる
-		AutoRender, err := cfg.Bool("AutoRender")
-		utils.DoError(err)
+		cfg, _ := conf.LoadConfig(".env")
+		AutoRender, _ := cfg.Bool("AutoRender")
 
 		if AutoRender {
 			route.controller.Render(ct)

@@ -18,7 +18,7 @@ func main() {
 	//log2.SetLevel(log2.LevelInfo)
 	//log2.Info("hogehoge")
 	//log2.Debug("piyopiyo")
-
+	mvc.NewApp()
 	router := &mvc.ControllerRegsiter{}
 	router.Add("/user/:id", &controllers.RootController{})
 	err := http.ListenAndServe(":9090", router)
