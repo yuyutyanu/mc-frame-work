@@ -16,6 +16,7 @@ func NewApp() *App{
 	app := new(App)
 	app.SetStaticPath("/img", "./static/img")
 	app.SetStaticPath("/css", "./static/css")
+	app.SetStaticPath("/js", "./static/js")
 	cfg, err := conf.LoadConfig(".env")
 	if err != nil{
 		panic(err)
