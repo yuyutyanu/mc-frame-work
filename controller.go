@@ -11,58 +11,58 @@ type Controller struct {
 	Ct *Context
 	Tpl *template.Template
 	Data map[interface{}]interface{}
-	ChildName string
+	ControllerName string
 	TplNames string
 	Template []string
 	TplExt string
 }
 
 type ControllerInterface interface {
-	Init(ct *Context, cn string)
-	Prepare()
-	Get()
-	Post()
-	Delete()
-	Put()
-	Head()
-	Patch()
-	Options()
-	Finish()
-	Render() error
+	Init(childName string)
+	Prepare(ct *Context)
+	Get(ct *Context)
+	Finish(ct *Context)
+	Post(ct *Context)
+	Delete(ct *Context)
+	Put(ct *Context)
+	Head(ct *Context)
+	Patch(ct *Context)
+	Options(ct *Context)
+	Render(ct *Context) error
 }
 
-func (c *Controller) Init(ct *Context, controllerName string){
+func (c *Controller) Init(controllerName string){
 	c.Data = make(map[interface{}]interface{})
 	c.Template = make([]string,0)
 	c.TplNames = ""
-	c.ChildName = controllerName
-	c.Ct = ct
+	c.ControllerName = controllerName
 	c.TplExt = "tpl"
 }
 
-func (c *Controller) Prepare(){}
-func (c *Controller) Finish(){}
+func (c *Controller) Prepare(ct *Context){}
+func (c *Controller) Finish(ct *Context){}
 
-func (c *Controller) Post(){
+func (c *Controller) Post(ct *Context){
 	http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
 }
-func (c *Controller) Delete(){
+func (c *Controller) Delete(ct *Context){
 	http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
 }
-func (c *Controller) Put(){
+func (c *Controller) Put(ct *Context){
 	http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
 }
-func (c *Controller) Head(){
+func (c *Controller) Head(ct *Context){
 	http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
 }
-func (c *Controller) Patch(){
+func (c *Controller) Patch(ct *Context){
 	http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
 }
-func (c *Controller) Options(){
+func (c *Controller) Options(ct *Context){
 	http.Error(c.Ct.ResponseWriter, "Method Not Allowed", 405)
 }
 
-func (c *Controller) Render() error{
+//todo 扱いづらいので base template を指定したら依存関係を解決するように
+func (c *Controller) Render(ct *Context) error{
 	if len(c.Template) > 0 {
 		var filenames []string
 		for _, file := range c.Template {
@@ -70,15 +70,15 @@ func (c *Controller) Render() error{
 		}
 		t, err := template.ParseFiles(filenames...)
 		utils.DoError(err)
-		err = t.ExecuteTemplate(c.Ct.ResponseWriter, c.TplNames, c.Data)
+		err = t.ExecuteTemplate(ct.ResponseWriter, c.TplNames, c.Data)
 		utils.DoError(err)
 	} else {
 		if c.TplNames == "" {
-			c.TplNames = c.ChildName + "/" + c.Ct.Request.Method + "." + c.TplExt
+			c.TplNames = c.ControllerName + "/" + ct.Request.Method + "." + c.TplExt
 		}
 		t, err := template.ParseFiles(path.Join("./views/", c.TplNames))
 		utils.DoError(err)
-		err = t.Execute(c.Ct.ResponseWriter, c.Data)
+		err = t.Execute(ct.ResponseWriter, c.Data)
 		utils.DoError(err)
 	}
 	return nil

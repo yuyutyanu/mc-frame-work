@@ -11,28 +11,28 @@ import (
 )
 
 type controllerInfo struct {
-	regex *regexp.Regexp
-	params map[int]string
-	controllerType reflect.Type
+	regex      *regexp.Regexp
+	params     map[int]string
+	controller ControllerInterface
 }
-type ControllerRegsiter struct{
+type ControllerRegsiter struct {
 	routes []*controllerInfo
 }
 
 type Context struct {
 	ResponseWriter http.ResponseWriter
-	Request *http.Request
-	Params map[string]string
+	Request        *http.Request
+	Params         map[string]string
 }
 
-func (p *ControllerRegsiter) Add(pettern string, c ControllerInterface){
-	parts := strings.Split(pettern,"/")
-	params:= make(map[int]string)
+func (p *ControllerRegsiter) Add(pettern string, c ControllerInterface) {
+	parts := strings.Split(pettern, "/")
+	params := make(map[int]string)
 
-	j:=0
-	for i, part := range parts{
+	j := 0
+	for i, part := range parts {
 		// '/part/:param'
-		if strings.HasPrefix(part, ":"){
+		if strings.HasPrefix(part, ":") {
 			expr := "([^/]+)"
 			// '/user/:id([0-9]+)' などの正規表現対応
 			if index := strings.Index(part, "("); index != -1 {
@@ -47,23 +47,17 @@ func (p *ControllerRegsiter) Add(pettern string, c ControllerInterface){
 	}
 	newPattern := strings.Join(parts, "/")
 	regex, regexErr := regexp.Compile(newPattern)
-
-	//if regexErr != nil {
-	//	panic(regexErr)
-	//	return
-	//}
 	utils.DoError(regexErr)
 
-	t := reflect.Indirect(reflect.ValueOf(c)).Type()
 	route := &controllerInfo{}
 	route.regex = regex
 	route.params = params
-	route.controllerType = t
+	route.controller = c
 
 	p.routes = append(p.routes, route)
 }
 
-func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request){
+func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	//Todo :------------------------
 	//defer func(){
@@ -87,8 +81,8 @@ func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request){
 	// static routing
 	var started bool
 	requestPath := r.URL.Path
-	for prefix, staticDir := range StaticDir{
-		if strings.HasPrefix(requestPath, prefix){
+	for prefix, staticDir := range StaticDir {
+		if strings.HasPrefix(requestPath, prefix) {
 			file := staticDir + requestPath[len(prefix):]
 			http.ServeFile(w, r, file)
 			started = true
@@ -96,79 +90,63 @@ func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request){
 		}
 	}
 
-	for _, route := range p.routes{
-		if !route.regex.MatchString(requestPath){
+	for _, route := range p.routes {
+		if !route.regex.MatchString(requestPath) {
 			continue
 		}
 
 		// /:id..etc params join query string
 		matches := route.regex.FindStringSubmatch(requestPath)
-		if len(matches[0]) != len(requestPath){
+		if len(matches[0]) != len(requestPath) {
 			continue
 		}
 
 		params := make(map[string]string)
-		if len(route.params) > 0{
+		if len(route.params) > 0 {
 			values := r.URL.Query()
-			for i, match := range matches[1:]{
+			for i, match := range matches[1:] {
 				values.Add(route.params[i], match)
 				params[route.params[i]] = match
 			}
 			r.URL.RawQuery = url.Values(values).Encode() + "&" + r.URL.RawQuery
 		}
 
-
-		vc := reflect.New(route.controllerType) // vc is reflect.Value of Controller
-		init := vc.MethodByName("Init")
-		in := make([]reflect.Value, 2)
 		ct := &Context{ResponseWriter: w, Request: r, Params: params}
-		in[0] = reflect.ValueOf(ct)
-		in[1] = reflect.ValueOf(route.controllerType.Name())
-		init.Call(in)
-		in = make([]reflect.Value, 0)
-		method := vc.MethodByName("Prepare")
-		method.Call(in)
+		childName := reflect.Indirect(reflect.ValueOf(route.controller)).Type().Name()
+		route.controller.Init(childName)
+		route.controller.Prepare(ct)
 
 		// if　はださいので　route.getみたいに叩ける用変える
-		if r.Method == "GET"{
-			method = vc.MethodByName("Get")
-			method.Call(in)
-		}else if r.Method == "POST" {
-			method = vc.MethodByName("Post")
-			method.Call(in)
+		if r.Method == "GET" {
+			route.controller.Get(ct)
+		} else if r.Method == "POST" {
+			route.controller.Post(ct)
 		} else if r.Method == "HEAD" {
-			method = vc.MethodByName("Head")
-			method.Call(in)
+			route.controller.Head(ct)
 		} else if r.Method == "DELETE" {
-			method = vc.MethodByName("Delete")
-			method.Call(in)
+			route.controller.Delete(ct)
 		} else if r.Method == "PUT" {
-			method = vc.MethodByName("Put")
-			method.Call(in)
+			route.controller.Put(ct)
 		} else if r.Method == "PATCH" {
-			method = vc.MethodByName("Patch")
-			method.Call(in)
+			route.controller.Patch(ct)
 		} else if r.Method == "OPTIONS" {
-			method = vc.MethodByName("Options")
-			method.Call(in)
+			route.controller.Options(ct)
 		}
 
-		cfg, err := conf.LoadConfig(".env.sample")
-		utils.DoError(err)// Todo error を拾う層をつくる
+		cfg, err := conf.LoadConfig(".env")
+		utils.DoError(err) // Todo error を拾う層をつくる
 		AutoRender, err := cfg.Bool("AutoRender")
 		utils.DoError(err)
 
-		if AutoRender{
-			method = vc.MethodByName("Render")
-			method.Call(in)
+		if AutoRender {
+			route.controller.Render(ct)
 		}
-		method = vc.MethodByName("Finish")
-		method.Call(in)
+		route.controller.Finish(ct)
 		started = true
 		break
 	}
 
-	if started == false{
+	if started == false {
 		http.NotFound(w, r)
 	}
 
