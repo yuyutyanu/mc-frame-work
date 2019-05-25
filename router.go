@@ -1,7 +1,7 @@
-package mvc
+package mc_frame_work
 
 import (
-	"github.com/yuyutyanu/mvc/utils"
+	"github.com/yuyutyanu/mc-frame-work/utils"
 	"net/http"
 	"reflect"
 	"regexp"

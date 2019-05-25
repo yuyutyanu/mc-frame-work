@@ -1,4 +1,4 @@
-package mvc
+package mc_frame_work
 
 type App struct {
 	Cfg *Config

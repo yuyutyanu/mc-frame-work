@@ -1,4 +1,4 @@
-package mvc
+package mc_frame_work
 
 import (
 	"bufio"

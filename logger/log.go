@@ -1,4 +1,4 @@
-package mvc
+package logger
 
 import (
 	"log"
