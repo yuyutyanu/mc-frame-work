@@ -1,10 +1,8 @@
 package mvc
 
 import (
-	"github.com/yuyutyanu/mvc/conf"
 	"github.com/yuyutyanu/mvc/utils"
 	"net/http"
-	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -104,12 +102,10 @@ func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		params := make(map[string]string)
 		if len(route.params) > 0 {
-			values := r.URL.Query()
 			for i, match := range matches[1:] {
-				values.Add(route.params[i], match)
-				params[route.params[i]] = match
+				key := strings.Replace(route.params[i], ":", "", -1)
+				params[key] = match
 			}
-			r.URL.RawQuery = url.Values(values).Encode() + "&" + r.URL.RawQuery
 		}
 
 		ct := &Context{ResponseWriter: w, Request: r, Params: params}
@@ -134,12 +130,6 @@ func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			route.controller.Options(ct)
 		}
 
-		cfg, _ := conf.LoadConfig(".env")
-		AutoRender, _ := cfg.Bool("AutoRender")
-
-		if AutoRender {
-			route.controller.Render(ct)
-		}
 		route.controller.Finish(ct)
 		started = true
 		break

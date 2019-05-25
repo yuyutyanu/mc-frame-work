@@ -1,9 +1,7 @@
 package mvc
 
-import "github.com/yuyutyanu/mvc/conf"
-
 type App struct {
-	Cfg *conf.Config
+	Cfg *Config
 }
 
 var StaticDir = make(map[string]string)
@@ -17,7 +15,7 @@ func NewApp() *App{
 	app.SetStaticPath("/img", "./static/img")
 	app.SetStaticPath("/css", "./static/css")
 	app.SetStaticPath("/js", "./static/js")
-	cfg, err := conf.LoadConfig(".env")
+	cfg, err := LoadConfig(".env")
 	if err != nil{
 		panic(err)
 	}

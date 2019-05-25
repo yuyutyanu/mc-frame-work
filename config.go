@@ -1,4 +1,4 @@
-package conf
+package mvc
 
 import (
 	"bufio"
