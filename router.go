@@ -113,7 +113,6 @@ func (p *ControllerRegsiter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		route.controller.Init(childName)
 		route.controller.Prepare(ct)
 
-		// if　はださいので　route.getみたいに叩ける用変える
 		if r.Method == "GET" {
 			route.controller.Get(ct)
 		} else if r.Method == "POST" {

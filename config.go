@@ -75,15 +75,13 @@ func LoadConfig(name string) (*Config, error) {
 		}
 
 		key := strings.TrimSpace(string(val[0]))
-		cfg.comment[nComment-1] = append(cfg.comment[nComment-1], key)
+		cfg.comment[nComment-1] = append(cfg.comment[nComment-1], "," + key)
 		cfg.data[key] = strings.TrimSpace(string(val[1]))
 		cfg.offset[key] = off
 	}
 
 	return cfg, nil
 }
-
-// Todo config.Get(key) で取れるようにしたい
 
 func (c *Config) Bool(key string) (bool, error) {
 	return strconv.ParseBool(c.data[key])
