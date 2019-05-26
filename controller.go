@@ -10,9 +10,6 @@ type Controller struct {
 	Tpl *template.Template
 	Data map[interface{}]interface{}
 	ControllerName string
-	TplNames string
-	Template []string
-	TplExt string
 }
 
 type ControllerInterface interface {
@@ -30,10 +27,7 @@ type ControllerInterface interface {
 
 func (c *Controller) Init(controllerName string){
 	c.Data = make(map[interface{}]interface{})
-	c.Template = make([]string,0)
-	c.TplNames = ""
 	c.ControllerName = controllerName
-	c.TplExt = "tpl"
 }
 
 func (c *Controller) Prepare(ct *Context){}
